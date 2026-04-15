@@ -9,6 +9,7 @@ import { getTodayPrompt, getAlternatePrompt } from '@/lib/prompts'
 import { programWeeks } from '@/data/programWeeks'
 import Timer from '@/components/Timer'
 import Recorder from '@/components/Recorder'
+import BottomNav from '@/components/BottomNav'
 import { SessionLog, WeekDurations } from '@/types'
 
 type SessionPhase = 'ready' | 'warmup' | 'practice' | 'speaking' | 'rating'
@@ -302,12 +303,7 @@ export default function SessionPage() {
         )}
 
         {/* Nav */}
-        <nav className="mt-10 flex justify-around border-t border-amber-200 pt-6">
-          <Link href="/" className="flex flex-col items-center text-gray-400"><span className="text-2xl">🏠</span><span className="text-xs">Home</span></Link>
-          <Link href="/session" className="flex flex-col items-center text-amber-600"><span className="text-2xl">🎤</span><span className="text-xs">Session</span></Link>
-          <Link href="/progress" className="flex flex-col items-center text-gray-400"><span className="text-2xl">📊</span><span className="text-xs">Progress</span></Link>
-          <Link href="/settings" className="flex flex-col items-center text-gray-400"><span className="text-2xl">⚙️</span><span className="text-xs">Settings</span></Link>
-        </nav>
+        <BottomNav />
       </div>
     </main>
   )

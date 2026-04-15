@@ -16,6 +16,18 @@ export default function Recorder({ isEnabled, onRecordingComplete }: RecorderPro
 
   const startRecording = useCallback(async () => {
     setError('')
+
+    // Check if MediaRecorder API is available (requires HTTPS or localhost)
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError('Recording is not supported in this browser. Try using Chrome or Safari on HTTPS.')
+      return
+    }
+
+    if (typeof MediaRecorder === 'undefined') {
+      setError('Recording is not supported in this browser. Try using a modern browser.')
+      return
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
@@ -27,6 +39,11 @@ export default function Recorder({ isEnabled, onRecordingComplete }: RecorderPro
         const url = URL.createObjectURL(blob)
         setRecordingUrl(url)
         onRecordingComplete?.(url)
+        stream.getTracks().forEach((t) => t.stop())
+      }
+      mr.onerror = () => {
+        setError('Recording stopped unexpectedly. Your session will still be saved.')
+        setRecording(false)
         stream.getTracks().forEach((t) => t.stop())
       }
       mr.start()
