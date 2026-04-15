@@ -1,4 +1,4 @@
-import { AppState, SessionLog, AppSettings, StreakData } from '@/types'
+import { AppState, SessionLog, AppSettings } from '@/types'
 
 const KEYS = {
   STATE: 'speakup_state',
@@ -23,19 +23,31 @@ const defaultState: AppState = {
   unlockedWeeks: [1],
 }
 
+// ─── SSR guard ────────────────────────────────────────────────────────────────
+
+function isBrowser(): boolean {
+  return typeof window !== 'undefined'
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function safeGet<T>(key: string, fallback: T): T {
+  if (!isBrowser()) return fallback
   try {
     const raw = localStorage.getItem(key)
     if (!raw) return fallback
-    return JSON.parse(raw) as T
+    const parsed = JSON.parse(raw)
+    // Basic validation: parsed must be same type as fallback
+    if (typeof parsed !== typeof fallback) return fallback
+    if (Array.isArray(fallback) && !Array.isArray(parsed)) return fallback
+    return parsed as T
   } catch {
     return fallback
   }
 }
 
 function safeSet(key: string, value: unknown): void {
+  if (!isBrowser()) return
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch (e) {
@@ -46,7 +58,14 @@ function safeSet(key: string, value: unknown): void {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export function loadState(): AppState {
-  return safeGet<AppState>(KEYS.STATE, defaultState)
+  const state = safeGet<AppState>(KEYS.STATE, defaultState)
+  // Ensure required fields exist even if stored data is stale/partial
+  return {
+    currentWeek: state.currentWeek ?? 1,
+    settings: state.settings ?? defaultSettings,
+    sessions: Array.isArray(state.sessions) ? state.sessions : [],
+    unlockedWeeks: Array.isArray(state.unlockedWeeks) ? state.unlockedWeeks : [1],
+  }
 }
 
 export function saveState(state: AppState): void {
@@ -54,7 +73,12 @@ export function saveState(state: AppState): void {
 }
 
 export function loadSessions(): SessionLog[] {
-  return safeGet<SessionLog[]>(KEYS.SESSIONS, [])
+  const sessions = safeGet<SessionLog[]>(KEYS.SESSIONS, [])
+  // Validate it's an array of objects with required fields
+  if (!Array.isArray(sessions)) return []
+  return sessions.filter(
+    (s) => s && typeof s.id === 'string' && typeof s.date === 'string'
+  )
 }
 
 export function saveSessions(sessions: SessionLog[]): void {
@@ -68,7 +92,9 @@ export function addSession(session: SessionLog): void {
 }
 
 export function loadSettings(): AppSettings {
-  return safeGet<AppSettings>(KEYS.SETTINGS, defaultSettings)
+  const settings = safeGet<AppSettings>(KEYS.SETTINGS, defaultSettings)
+  // Merge with defaults to fill any missing fields
+  return { ...defaultSettings, ...settings }
 }
 
 export function saveSettings(settings: AppSettings): void {
@@ -76,6 +102,7 @@ export function saveSettings(settings: AppSettings): void {
 }
 
 export function clearAll(): void {
+  if (!isBrowser()) return
   Object.values(KEYS).forEach((k) => localStorage.removeItem(k))
 }
 

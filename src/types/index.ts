@@ -1,5 +1,11 @@
 // ─── Core Data Models ────────────────────────────────────────────────────────
 
+export interface WeekDurations {
+  warmUp: number    // seconds
+  practice: number  // seconds
+  speaking: number  // seconds
+}
+
 export interface ProgramWeek {
   weekNumber: number
   title: string
@@ -7,6 +13,7 @@ export interface ProgramWeek {
   focus: string
   activities: string[]
   prompts: string[]
+  durations: WeekDurations
   minSessionsToUnlockNext: number
 }
 
@@ -62,9 +69,19 @@ export interface WeekCardProps {
 }
 
 export interface TimerProps {
-  targetMinutes: number
+  label: string
+  totalSeconds: number
+  isActive: boolean
   onComplete: () => void
-  isRunning: boolean
+  onReset?: () => void
+}
+
+export interface RecorderProps {
+  isRecording: boolean
+  onStart: () => void
+  onStop: () => void
+  recordingUrl?: string
+  error?: string
 }
 
 export interface ConfidenceRatingProps {

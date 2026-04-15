@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { loadSettings, saveSettings, clearAll } from '@/lib/storage'
 import { AppSettings } from '@/types'
 import { useRouter } from 'next/navigation'
+import BottomNav from '@/components/BottomNav'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -37,13 +37,13 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen bg-amber-50 px-4 py-8">
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md overflow-hidden">
         <h1 className="mb-6 text-2xl font-bold text-amber-900">⚙️ Settings</h1>
 
         <div className="space-y-4">
           {/* Child name */}
           <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <label className="mb-2 block text-sm font-semibold text-gray-700">Child's name</label>
+            <label className="mb-2 block text-sm font-semibold text-gray-700">Child&apos;s name</label>
             <input
               type="text"
               value={settings.childName}
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           {/* Save button */}
           <button
             onClick={handleSave}
-            className="w-full rounded-2xl bg-amber-400 py-4 font-bold text-white shadow-md hover:bg-amber-500"
+            className="w-full rounded-2xl bg-amber-400 py-4 font-bold text-white shadow-md hover:bg-amber-500 active:scale-95 transition-transform"
           >
             {saved ? '✅ Saved!' : 'Save Settings'}
           </button>
@@ -128,13 +128,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="mt-10 flex justify-around border-t border-amber-200 pt-6">
-          <Link href="/" className="flex flex-col items-center text-gray-400"><span className="text-2xl">🏠</span><span className="text-xs">Home</span></Link>
-          <Link href="/session" className="flex flex-col items-center text-gray-400"><span className="text-2xl">🎤</span><span className="text-xs">Session</span></Link>
-          <Link href="/progress" className="flex flex-col items-center text-gray-400"><span className="text-2xl">📊</span><span className="text-xs">Progress</span></Link>
-          <Link href="/settings" className="flex flex-col items-center text-amber-600"><span className="text-2xl">⚙️</span><span className="text-xs">Settings</span></Link>
-        </nav>
+        <BottomNav />
       </div>
     </main>
   )
