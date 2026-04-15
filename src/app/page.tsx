@@ -31,7 +31,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-amber-50 px-4 py-8">
-      <div className="mx-auto max-w-lg">
+      <div className="mx-auto max-w-lg overflow-hidden">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>

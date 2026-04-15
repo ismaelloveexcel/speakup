@@ -10,18 +10,27 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'SpeakUp',
   },
+  icons: {
+    icon: '/icon-192.png',
+    apple: '/icon-192.png',
+  },
 }
 
 export const viewport: Viewport = {
   themeColor: '#f59e0b',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/icon-192.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   )

@@ -83,7 +83,7 @@ export default function ParentDashboard() {
 
   return (
     <main className="min-h-screen bg-amber-50 px-4 py-8">
-      <div className="mx-auto max-w-lg">
+      <div className="mx-auto max-w-lg overflow-hidden">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-amber-900">📊 Parent Dashboard</h1>
           <Link href="/" className="rounded-full bg-amber-200 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-300">

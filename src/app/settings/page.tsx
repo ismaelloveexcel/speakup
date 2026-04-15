@@ -37,7 +37,7 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen bg-amber-50 px-4 py-8">
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md overflow-hidden">
         <h1 className="mb-6 text-2xl font-bold text-amber-900">⚙️ Settings</h1>
 
         <div className="space-y-4">

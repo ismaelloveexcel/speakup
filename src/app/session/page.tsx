@@ -116,7 +116,7 @@ export default function SessionPage() {
 
   return (
     <main className="min-h-screen bg-amber-50 px-4 py-8">
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-md overflow-hidden">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-amber-900">Week {weekNumber} Session</h1>
           <Link href="/" className="text-sm text-amber-600 underline hover:text-amber-800">
