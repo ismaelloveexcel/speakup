@@ -168,7 +168,7 @@ export default function ParentDashboard() {
                     <tr key={ws.weekNumber} className="border-b border-gray-100 last:border-0">
                       <td className="py-2 pr-2">
                         <p className="font-medium text-gray-700">W{ws.weekNumber}</p>
-                        <p className="text-xs text-gray-400 truncate max-w-[100px]">{ws.title}</p>
+                        <p className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-[160px]">{ws.title}</p>
                       </td>
                       <td className="py-2 px-2 text-center font-medium text-gray-700">
                         {ws.sessions}/{ws.target}

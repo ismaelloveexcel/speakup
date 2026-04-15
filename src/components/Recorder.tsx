@@ -14,17 +14,19 @@ export default function Recorder({ isEnabled, onRecordingComplete }: RecorderPro
   const mediaRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<BlobPart[]>([])
 
+  /** Check if the browser supports audio recording */
+  function isRecordingSupported(): boolean {
+    return typeof navigator !== 'undefined' &&
+      !!navigator.mediaDevices &&
+      !!navigator.mediaDevices.getUserMedia &&
+      typeof MediaRecorder !== 'undefined'
+  }
+
   const startRecording = useCallback(async () => {
     setError('')
 
-    // Check if MediaRecorder API is available (requires HTTPS or localhost)
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (!isRecordingSupported()) {
       setError('Recording is not supported in this browser. Try using Chrome or Safari on HTTPS.')
-      return
-    }
-
-    if (typeof MediaRecorder === 'undefined') {
-      setError('Recording is not supported in this browser. Try using a modern browser.')
       return
     }
 

@@ -139,32 +139,32 @@ export default function SessionPage() {
         </div>
 
         {/* Phase indicators */}
-        {phase !== 'ready' && phase !== 'rating' && (
-          <div className="mb-4 flex items-center justify-center gap-2">
-            {(['warmup', 'practice', 'speaking'] as const).map((p) => {
-              const phases = ['warmup', 'practice', 'speaking'] as const
-              const pIdx = phases.indexOf(p)
-              const phaseInPhases = phases.indexOf(phase as 'warmup' | 'practice' | 'speaking')
-              const currentIdx = phaseInPhases >= 0 ? phaseInPhases : -1
-              const isCurrent = phase === p
-              const isPast = pIdx < currentIdx
-              return (
-                <div
-                  key={p}
-                  className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
-                    isCurrent
-                      ? 'bg-amber-400 text-white'
-                      : isPast
-                        ? 'bg-green-100 text-green-600'
-                        : 'bg-gray-200 text-gray-400'
-                  }`}
-                >
-                  {isCurrent ? '●' : isPast ? '✓' : '○'} {p === 'warmup' ? 'Warm-up' : p === 'practice' ? 'Practice' : 'Speaking'}
-                </div>
-              )
-            })}
-          </div>
-        )}
+        {phase !== 'ready' && phase !== 'rating' && (() => {
+          const timerPhases = ['warmup', 'practice', 'speaking'] as const
+          const currentIdx = timerPhases.indexOf(phase as typeof timerPhases[number])
+          return (
+            <div className="mb-4 flex items-center justify-center gap-2">
+              {timerPhases.map((p, pIdx) => {
+                const isCurrent = phase === p
+                const isPast = pIdx < (currentIdx >= 0 ? currentIdx : -1)
+                return (
+                  <div
+                    key={p}
+                    className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                      isCurrent
+                        ? 'bg-amber-400 text-white'
+                        : isPast
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-gray-200 text-gray-400'
+                    }`}
+                  >
+                    {isCurrent ? '●' : isPast ? '✓' : '○'} {p === 'warmup' ? 'Warm-up' : p === 'practice' ? 'Practice' : 'Speaking'}
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
 
         {/* Timers */}
         {phase !== 'ready' && phase !== 'rating' && (
