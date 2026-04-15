@@ -1,28 +1,29 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { loadState, loadSessions, addSession, saveState, generateId, todayISO } from '@/lib/storage'
 import { computeUnlockedWeeks, getActiveWeek } from '@/lib/unlock'
 import { getTodayPrompt, getAlternatePrompt } from '@/lib/prompts'
-import { SessionLog } from '@/types'
+import { programWeeks } from '@/data/programWeeks'
+import Timer from '@/components/Timer'
+import Recorder from '@/components/Recorder'
+import { SessionLog, WeekDurations } from '@/types'
 
-type Phase = 'ready' | 'recording' | 'done' | 'rating'
+type SessionPhase = 'ready' | 'warmup' | 'practice' | 'speaking' | 'rating'
 
 export default function SessionPage() {
   const router = useRouter()
   const [prompt, setPrompt] = useState('')
   const [weekNumber, setWeekNumber] = useState(1)
-  const [phase, setPhase] = useState<Phase>('ready')
-  const [elapsed, setElapsed] = useState(0)          // seconds
-  const [targetSec, setTargetSec] = useState(300)    // 5 min default
+  const [durations, setDurations] = useState<WeekDurations>({ warmUp: 30, practice: 60, speaking: 120 })
+  const [phase, setPhase] = useState<SessionPhase>('ready')
   const [confidence, setConfidence] = useState(0)
   const [recordingUrl, setRecordingUrl] = useState<string | undefined>()
-  const [error, setError] = useState('')
-
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const mediaRef = useRef<MediaRecorder | null>(null)
-  const chunksRef = useRef<BlobPart[]>([])
+  const [totalElapsed, setTotalElapsed] = useState(0)
+  const elapsedRef = useRef(0)
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     const state = loadState()
@@ -30,81 +31,73 @@ export default function SessionPage() {
     const unlocked = computeUnlockedWeeks(sessions)
     const active = getActiveWeek(sessions, unlocked)
     setWeekNumber(active)
-    setTargetSec(state.settings.sessionTargetMinutes * 60)
+
+    const week = programWeeks.find((w) => w.weekNumber === active)
+    if (week) {
+      setDurations(week.durations)
+    }
+
     setPrompt(getTodayPrompt(active, sessions))
   }, [])
 
-  // ─── Timer ────────────────────────────────────────────────────────────────
+  // Track total elapsed seconds across all phases
   useEffect(() => {
-    if (phase === 'recording') {
-      timerRef.current = setInterval(() => {
-        setElapsed((e) => {
-          if (e + 1 >= targetSec) {
-            stopSession()
-            return e + 1
-          }
-          return e + 1
-        })
+    if (phase === 'warmup' || phase === 'practice' || phase === 'speaking') {
+      elapsedRef.current = 0
+      elapsedTimerRef.current = setInterval(() => {
+        elapsedRef.current += 1
       }, 1000)
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current)
     }
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+
+    return () => {
+      if (elapsedTimerRef.current) {
+        setTotalElapsed((prev) => prev + elapsedRef.current)
+        clearInterval(elapsedTimerRef.current)
+        elapsedTimerRef.current = null
+      }
+    }
   }, [phase])
 
-  const remaining = Math.max(0, targetSec - elapsed)
-  const mm = String(Math.floor(remaining / 60)).padStart(2, '0')
-  const ss = String(remaining % 60).padStart(2, '0')
-  const pct = Math.min(100, (elapsed / targetSec) * 100)
+  const handleWarmupComplete = useCallback(() => {
+    setPhase('practice')
+  }, [])
 
-  // ─── Recording ────────────────────────────────────────────────────────────
-  async function startSession() {
-    setError('')
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
-      const mr = new MediaRecorder(stream, { mimeType })
-      chunksRef.current = []
-      mr.ondataavailable = (e) => chunksRef.current.push(e.data)
-      mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: mimeType })
-        setRecordingUrl(URL.createObjectURL(blob))
-        stream.getTracks().forEach((t) => t.stop())
-      }
-      mr.start()
-      mediaRef.current = mr
-      setElapsed(0)
-      setPhase('recording')
-    } catch (err) {
-      // Microphone not available — still allow session without recording
-      setError('Microphone not available. Session will be logged without audio.')
-      setPhase('recording')
-    }
+  const handlePracticeComplete = useCallback(() => {
+    setPhase('speaking')
+  }, [])
+
+  const handleSpeakingComplete = useCallback(() => {
+    setPhase('rating')
+  }, [])
+
+  function startSession() {
+    setPhase('warmup')
   }
 
-  function stopSession() {
-    if (mediaRef.current && mediaRef.current.state !== 'inactive') {
-      mediaRef.current.stop()
-    }
-    if (timerRef.current) clearInterval(timerRef.current)
-    setPhase('rating')
+  function skipToNext() {
+    if (phase === 'warmup') setPhase('practice')
+    else if (phase === 'practice') setPhase('speaking')
+    else if (phase === 'speaking') setPhase('rating')
   }
 
   function submitSession() {
     if (confidence === 0) return
+
+    // Calculate total duration including the final phase
+    const finalTotal = totalElapsed + elapsedRef.current
     const session: SessionLog = {
       id: generateId(),
       date: todayISO(),
       weekNumber,
       prompt,
-      durationMinutes: Math.max(1, Math.round(elapsed / 60)),
+      durationMinutes: Math.max(1, Math.round(finalTotal / 60)),
       confidence,
       recordingUrl,
       completed: true,
     }
     addSession(session)
 
-    // Update currentWeek in state
+    // Update state
     const state = loadState()
     const sessions = loadSessions()
     const unlocked = computeUnlockedWeeks(sessions)
@@ -118,16 +111,21 @@ export default function SessionPage() {
     setPrompt(getAlternatePrompt(weekNumber, prompt, sessions))
   }
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  const week = programWeeks.find((w) => w.weekNumber === weekNumber)
+
   return (
     <main className="min-h-screen bg-amber-50 px-4 py-8">
       <div className="mx-auto max-w-md">
-
-        <h1 className="mb-2 text-2xl font-bold text-amber-900">Week {weekNumber} Session</h1>
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-amber-900">Week {weekNumber} Session</h1>
+          <Link href="/" className="text-sm text-amber-600 underline hover:text-amber-800">
+            ← Home
+          </Link>
+        </div>
 
         {/* Prompt card */}
         <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-500">Today's Topic</p>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-500">Today&apos;s Topic</p>
           <p className="text-lg font-medium text-gray-800 leading-relaxed">{prompt}</p>
           {phase === 'ready' && (
             <button
@@ -139,34 +137,93 @@ export default function SessionPage() {
           )}
         </div>
 
-        {error && (
-          <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+        {/* Phase indicators */}
+        {phase !== 'ready' && phase !== 'rating' && (
+          <div className="mb-4 flex items-center justify-center gap-2">
+            {(['warmup', 'practice', 'speaking'] as const).map((p) => {
+              const phases = ['warmup', 'practice', 'speaking'] as const
+              const pIdx = phases.indexOf(p)
+              const currentIdx = phases.indexOf(phase as typeof phases[number])
+              const isCurrent = phase === p
+              const isPast = pIdx < currentIdx
+              return (
+                <div
+                  key={p}
+                  className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                    isCurrent
+                      ? 'bg-amber-400 text-white'
+                      : isPast
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-gray-200 text-gray-400'
+                  }`}
+                >
+                  {isCurrent ? '●' : isPast ? '✓' : '○'} {p === 'warmup' ? 'Warm-up' : p === 'practice' ? 'Practice' : 'Speaking'}
+                </div>
+              )
+            })}
+          </div>
         )}
 
-        {/* Timer ring */}
-        <div className="mb-6 flex flex-col items-center">
-          <div className="relative h-48 w-48">
-            <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#fde68a" strokeWidth="8" />
-              <circle
-                cx="50" cy="50" r="45"
-                fill="none" stroke="#f59e0b" strokeWidth="8"
-                strokeDasharray={`${2 * Math.PI * 45}`}
-                strokeDashoffset={`${2 * Math.PI * 45 * (1 - pct / 100)}`}
-                strokeLinecap="round"
-                className="transition-all duration-1000"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-bold text-amber-800">{mm}:{ss}</span>
-              <span className="text-sm text-amber-600">
-                {phase === 'ready' ? 'target time' : phase === 'recording' ? 'remaining' : 'done!'}
-              </span>
-            </div>
-          </div>
-        </div>
+        {/* Timers */}
+        {phase !== 'ready' && phase !== 'rating' && (
+          <div className="mb-6 space-y-4">
+            {phase === 'warmup' && (
+              <div>
+                <Timer
+                  label="🌟 Warm-up"
+                  totalSeconds={durations.warmUp}
+                  isActive={true}
+                  onComplete={handleWarmupComplete}
+                />
+                <p className="mt-2 text-center text-sm text-gray-500">
+                  Take a deep breath. Think about what you want to say.
+                </p>
+              </div>
+            )}
 
-        {/* Controls */}
+            {phase === 'practice' && (
+              <div>
+                <Timer
+                  label="🗣 Practice"
+                  totalSeconds={durations.practice}
+                  isActive={true}
+                  onComplete={handlePracticeComplete}
+                />
+                <p className="mt-2 text-center text-sm text-gray-500">
+                  Practice your thoughts out loud. It&apos;s okay to make mistakes!
+                </p>
+              </div>
+            )}
+
+            {phase === 'speaking' && (
+              <div>
+                <Timer
+                  label="🎤 Speaking"
+                  totalSeconds={durations.speaking}
+                  isActive={true}
+                  onComplete={handleSpeakingComplete}
+                />
+                <Recorder
+                  isEnabled={true}
+                  onRecordingComplete={(url) => setRecordingUrl(url)}
+                />
+                <p className="mt-2 text-center text-sm text-gray-500">
+                  You&apos;re recording! Speak clearly and have fun.
+                </p>
+              </div>
+            )}
+
+            {/* Skip button */}
+            <button
+              onClick={skipToNext}
+              className="w-full rounded-xl border-2 border-amber-200 py-3 text-sm font-medium text-amber-600 hover:bg-amber-50 active:scale-95 transition-transform"
+            >
+              Skip to {phase === 'warmup' ? 'Practice' : phase === 'practice' ? 'Speaking' : 'Finish'} →
+            </button>
+          </div>
+        )}
+
+        {/* Start button */}
         {phase === 'ready' && (
           <button
             onClick={startSession}
@@ -176,21 +233,7 @@ export default function SessionPage() {
           </button>
         )}
 
-        {phase === 'recording' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-red-50 py-3">
-              <span className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
-              <span className="font-medium text-red-700">Recording…</span>
-            </div>
-            <button
-              onClick={stopSession}
-              className="w-full rounded-2xl bg-gray-800 py-4 text-lg font-bold text-white hover:bg-gray-900 active:scale-95 transition-transform"
-            >
-              ⏹ Stop &amp; Finish
-            </button>
-          </div>
-        )}
-
+        {/* Rating phase */}
         {phase === 'rating' && (
           <div className="space-y-5">
             {recordingUrl && (
@@ -235,6 +278,35 @@ export default function SessionPage() {
             </button>
           </div>
         )}
+
+        {/* Session info */}
+        {week && phase === 'ready' && (
+          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+            <h3 className="mb-2 font-bold text-gray-700">Session Flow</h3>
+            <div className="space-y-2 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">1</span>
+                <span>Warm-up ({Math.floor(durations.warmUp / 60)}:{String(durations.warmUp % 60).padStart(2, '0')})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">2</span>
+                <span>Practice ({Math.floor(durations.practice / 60)}:{String(durations.practice % 60).padStart(2, '0')})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">3</span>
+                <span>Speaking ({Math.floor(durations.speaking / 60)}:{String(durations.speaking % 60).padStart(2, '0')})</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Nav */}
+        <nav className="mt-10 flex justify-around border-t border-amber-200 pt-6">
+          <Link href="/" className="flex flex-col items-center text-gray-400"><span className="text-2xl">🏠</span><span className="text-xs">Home</span></Link>
+          <Link href="/session" className="flex flex-col items-center text-amber-600"><span className="text-2xl">🎤</span><span className="text-xs">Session</span></Link>
+          <Link href="/progress" className="flex flex-col items-center text-gray-400"><span className="text-2xl">📊</span><span className="text-xs">Progress</span></Link>
+          <Link href="/settings" className="flex flex-col items-center text-gray-400"><span className="text-2xl">⚙️</span><span className="text-xs">Settings</span></Link>
+        </nav>
       </div>
     </main>
   )

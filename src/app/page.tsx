@@ -7,6 +7,7 @@ import { computeUnlockedWeeks, sessionsUntilUnlock } from '@/lib/unlock'
 import { computeStreak, hasSessionToday } from '@/lib/streak'
 import { programWeeks } from '@/data/programWeeks'
 import { AppState, SessionLog } from '@/types'
+import WeekCard from '@/components/WeekCard'
 
 export default function HomePage() {
   const [state, setState] = useState<AppState | null>(null)
@@ -85,39 +86,14 @@ export default function HomePage() {
           const isActive = week.weekNumber === state.currentWeek
 
           return (
-            <div
+            <WeekCard
               key={week.weekNumber}
-              className={`rounded-xl border-2 p-4 transition-all ${
-                unlocked
-                  ? isActive
-                    ? 'border-amber-400 bg-white shadow-md'
-                    : 'border-amber-200 bg-white'
-                  : 'border-gray-200 bg-gray-50 opacity-60'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{unlocked ? '✅' : '🔒'}</span>
-                  <div>
-                    <p className="font-bold text-gray-800">
-                      Week {week.weekNumber}: {week.title}
-                    </p>
-                    <p className="text-sm text-gray-500">{week.focus}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {unlocked ? (
-                    <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
-                      {completedCount} sessions
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-400">
-                      {remaining} more to unlock
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+              week={week}
+              isUnlocked={unlocked}
+              completedSessions={completedCount}
+              isActive={isActive}
+              remaining={remaining}
+            />
           )
         })}
       </div>

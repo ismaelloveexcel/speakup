@@ -6,6 +6,7 @@ import { loadSessions } from '@/lib/storage'
 import { computeProgress, getRecentSessions } from '@/lib/progress'
 import { ProgressMetrics, SessionLog } from '@/types'
 import { programWeeks } from '@/data/programWeeks'
+import ProgressCard from '@/components/ProgressCard'
 
 export default function ProgressPage() {
   const [metrics, setMetrics] = useState<ProgressMetrics | null>(null)
@@ -25,18 +26,10 @@ export default function ProgressPage() {
 
       {/* Stats grid */}
       <div className="mb-6 grid grid-cols-2 gap-3">
-        {[
-          { label: 'Sessions', value: metrics.totalSessions, icon: '🎤' },
-          { label: 'Minutes spoken', value: metrics.totalMinutes, icon: '⏱' },
-          { label: 'Avg confidence', value: `${metrics.averageConfidence}/5`, icon: '⭐' },
-          { label: 'Programme done', value: `${metrics.weekCompletionPct}%`, icon: '🏆' },
-        ].map(({ label, value, icon }) => (
-          <div key={label} className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-3xl">{icon}</p>
-            <p className="mt-2 text-2xl font-bold text-amber-800">{value}</p>
-            <p className="text-sm text-gray-500">{label}</p>
-          </div>
-        ))}
+        <ProgressCard icon="🎤" label="Sessions" value={metrics.totalSessions} />
+        <ProgressCard icon="⏱" label="Minutes spoken" value={metrics.totalMinutes} />
+        <ProgressCard icon="⭐" label="Avg confidence" value={`${metrics.averageConfidence}/5`} />
+        <ProgressCard icon="🏆" label="Programme done" value={`${metrics.weekCompletionPct}%`} />
       </div>
 
       {/* Streak */}

@@ -25,7 +25,6 @@ export function computeStreak(sessions: SessionLog[]): StreakData {
   const dateSet = new Set(uniqueDates)
 
   let current = 0
-  let cursor = lastSessionDate
 
   // If last session was not today or yesterday, streak is broken
   const daysBetween = dateDiffDays(lastSessionDate, today)
