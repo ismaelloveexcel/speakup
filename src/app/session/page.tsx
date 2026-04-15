@@ -143,7 +143,8 @@ export default function SessionPage() {
             {(['warmup', 'practice', 'speaking'] as const).map((p) => {
               const phases = ['warmup', 'practice', 'speaking'] as const
               const pIdx = phases.indexOf(p)
-              const currentIdx = phases.indexOf(phase as typeof phases[number])
+              const phaseInPhases = phases.indexOf(phase as 'warmup' | 'practice' | 'speaking')
+              const currentIdx = phaseInPhases >= 0 ? phaseInPhases : -1
               const isCurrent = phase === p
               const isPast = pIdx < currentIdx
               return (

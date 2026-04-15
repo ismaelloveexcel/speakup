@@ -32,7 +32,8 @@ export default function Recorder({ isEnabled, onRecordingComplete }: RecorderPro
       mr.start()
       mediaRef.current = mr
       setRecording(true)
-    } catch {
+    } catch (err) {
+      console.error('[SpeakUp] Microphone access failed:', err)
       setError('Microphone not available. You can still complete the session without audio.')
     }
   }, [onRecordingComplete])
