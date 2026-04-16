@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { loadState, loadSessions, addSession, saveState, generateId, todayISO } from '@/lib/storage'
-import { computeUnlockedWeeks, getActiveWeek } from '@/lib/unlock'
+import { getActiveWeek } from '@/lib/unlock'
 import { getTodayPrompt, getAlternatePrompt } from '@/lib/prompts'
 import { programWeeks } from '@/data/programWeeks'
 import Timer from '@/components/Timer'
@@ -27,10 +27,8 @@ export default function SessionPage() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    const state = loadState()
     const sessions = loadSessions()
-    const unlocked = computeUnlockedWeeks(sessions)
-    const active = getActiveWeek(sessions, unlocked)
+    const active = getActiveWeek(sessions)
     setWeekNumber(active)
 
     const week = programWeeks.find((w) => w.weekNumber === active)
@@ -100,9 +98,7 @@ export default function SessionPage() {
 
     // Update state
     const state = loadState()
-    const sessions = loadSessions()
-    const unlocked = computeUnlockedWeeks(sessions)
-    saveState({ ...state, unlockedWeeks: unlocked })
+    saveState({ ...state, unlockedWeeks: programWeeks.map((w) => w.weekNumber) })
 
     router.push('/progress')
   }

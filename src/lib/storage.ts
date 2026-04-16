@@ -20,7 +20,7 @@ const defaultState: AppState = {
   currentWeek: 1,
   settings: defaultSettings,
   sessions: [],
-  unlockedWeeks: [1],
+  unlockedWeeks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 }
 
 // ─── SSR guard ────────────────────────────────────────────────────────────────

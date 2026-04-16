@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { loadState, loadSessions } from '@/lib/storage'
-import { computeUnlockedWeeks, sessionsUntilUnlock } from '@/lib/unlock'
+import { computeUnlockedWeeks } from '@/lib/unlock'
 import { computeStreak, hasSessionToday } from '@/lib/streak'
 import { programWeeks } from '@/data/programWeeks'
 import { AppState, SessionLog } from '@/types'
@@ -90,24 +90,17 @@ export default function HomePage() {
         <h2 className="mb-4 text-lg font-bold text-amber-900">Your 12-Week Journey</h2>
         <div className="grid gap-3">
           {programWeeks.map((week) => {
-            const unlocked = state.unlockedWeeks.includes(week.weekNumber)
             const completedCount = sessions.filter(
               (s) => s.weekNumber === week.weekNumber && s.completed
             ).length
-            // For a locked week N, show how many more sessions are needed in week N-1
-            const sessionsToUnlock = week.weekNumber > 1
-              ? sessionsUntilUnlock(week.weekNumber - 1, sessions)
-              : 0
             const isActive = week.weekNumber === state.currentWeek
 
             return (
               <WeekCard
                 key={week.weekNumber}
                 week={week}
-                isUnlocked={unlocked}
                 completedSessions={completedCount}
                 isActive={isActive}
-                sessionsToUnlock={sessionsToUnlock}
               />
             )
           })}

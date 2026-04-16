@@ -62,7 +62,6 @@ export interface AppState {
 
 export interface WeekCardProps {
   week: ProgramWeek
-  isUnlocked: boolean
   completedSessions: number
   isActive: boolean
   onSelect: (weekNumber: number) => void
