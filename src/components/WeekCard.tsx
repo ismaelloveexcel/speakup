@@ -15,7 +15,7 @@ export default function WeekCard({
   isActive,
   onSelect,
 }: WeekCardProps) {
-  const target = week.minSessionsToUnlockNext || 5
+  const target = week.targetSessions || 5
 
   return (
     <div

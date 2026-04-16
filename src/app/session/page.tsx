@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { loadState, loadSessions, addSession, saveState, generateId, todayISO } from '@/lib/storage'
+import { loadSessions, addSession, generateId, todayISO } from '@/lib/storage'
 import { getActiveWeek } from '@/lib/unlock'
 import { getTodayPrompt, getAlternatePrompt } from '@/lib/prompts'
 import { programWeeks } from '@/data/programWeeks'
@@ -95,10 +95,6 @@ export default function SessionPage() {
       completed: true,
     }
     addSession(session)
-
-    // Update state
-    const state = loadState()
-    saveState({ ...state, unlockedWeeks: programWeeks.map((w) => w.weekNumber) })
 
     router.push('/progress')
   }

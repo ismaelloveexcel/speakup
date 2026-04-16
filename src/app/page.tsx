@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { loadState, loadSessions } from '@/lib/storage'
-import { computeUnlockedWeeks } from '@/lib/unlock'
 import { computeStreak, hasSessionToday } from '@/lib/streak'
 import { programWeeks } from '@/data/programWeeks'
 import { AppState, SessionLog } from '@/types'
@@ -17,8 +16,7 @@ export default function HomePage() {
   useEffect(() => {
     const s = loadState()
     const sess = loadSessions()
-    const unlocked = computeUnlockedWeeks(sess)
-    setState({ ...s, unlockedWeeks: unlocked })
+    setState(s)
     setSessions(sess)
   }, [])
 

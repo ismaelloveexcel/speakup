@@ -31,11 +31,11 @@ export function computeProgress(sessions: SessionLog[]): ProgressMetrics {
     ).length
   })
 
-  // Week completion %: how many weeks have met their minSessionsToUnlockNext target
+  // Week completion %: how many weeks have met their session target
   const weeksCompleted = programWeeks.filter(
     (w) =>
-      w.minSessionsToUnlockNext > 0 &&
-      (sessionsByWeek[w.weekNumber] ?? 0) >= w.minSessionsToUnlockNext
+      w.targetSessions > 0 &&
+      (sessionsByWeek[w.weekNumber] ?? 0) >= w.targetSessions
   ).length
   const weekCompletionPct = Math.round((weeksCompleted / programWeeks.length) * 100)
 
@@ -64,7 +64,7 @@ export function computeWeekStats(sessions: SessionLog[]): WeekStats[] {
       sessions: weekSessions.length,
       totalMinutes,
       averageConfidence: avgConf,
-      target: w.minSessionsToUnlockNext || 5,
+      target: w.targetSessions || 5,
     }
   })
 }

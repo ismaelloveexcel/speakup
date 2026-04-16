@@ -14,7 +14,7 @@ export interface ProgramWeek {
   activities: string[]
   prompts: string[]
   durations: WeekDurations
-  minSessionsToUnlockNext: number
+  targetSessions: number
 }
 
 export interface SessionLog {
@@ -55,7 +55,6 @@ export interface AppState {
   currentWeek: number
   settings: AppSettings
   sessions: SessionLog[]
-  unlockedWeeks: number[]
 }
 
 // ─── Component Props ──────────────────────────────────────────────────────────
@@ -64,7 +63,7 @@ export interface WeekCardProps {
   week: ProgramWeek
   completedSessions: number
   isActive: boolean
-  onSelect: (weekNumber: number) => void
+  onSelect?: (weekNumber: number) => void
 }
 
 export interface TimerProps {
