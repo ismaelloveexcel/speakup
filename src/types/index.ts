@@ -59,13 +59,6 @@ export interface AppState {
 
 // ─── Component Props ──────────────────────────────────────────────────────────
 
-export interface WeekCardProps {
-  week: ProgramWeek
-  completedSessions: number
-  isActive: boolean
-  onSelect?: (weekNumber: number) => void
-}
-
 export interface TimerProps {
   label: string
   totalSeconds: number

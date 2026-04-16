@@ -53,8 +53,8 @@ export default function ProgressPage() {
           <div className="space-y-3">
             {programWeeks.map((week) => {
               const done = metrics.sessionsByWeek[week.weekNumber] ?? 0
-              const target = week.targetSessions || 5
-              const pct = Math.min(100, Math.round((done / target) * 100))
+              const target = week.targetSessions ?? 5
+              const pct = target > 0 ? Math.min(100, Math.round((done / target) * 100)) : 100
               return (
                 <div key={week.weekNumber}>
                   <div className="mb-1 flex justify-between text-sm">
