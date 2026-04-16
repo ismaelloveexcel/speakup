@@ -27,9 +27,12 @@ export function sessionsUntilUnlock(_weekNumber: number, _sessions: SessionLog[]
 
 /**
  * Returns the highest week the child has actively started (has at least 1 session).
+ * Filters out sessions with invalid weekNumber values and clamps to valid range.
  */
 export function getActiveWeek(sessions: SessionLog[]): number {
-  if (sessions.length === 0) return 1
-  const started = sessions.map((s) => s.weekNumber)
-  return Math.max(...started)
+  const validWeekNumbers = sessions
+    .map((s) => s.weekNumber)
+    .filter((n) => Number.isFinite(n) && n >= 1 && n <= programWeeks.length)
+  if (validWeekNumbers.length === 0) return 1
+  return Math.max(...validWeekNumbers)
 }

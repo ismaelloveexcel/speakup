@@ -48,7 +48,7 @@ export default function WeekCard({
       </div>
 
       {/* Progress bar */}
-      {week.minSessionsToUnlockNext > 0 && (
+      {target > 0 && (
         <div className="mt-3">
           <div className="h-2 w-full rounded-full bg-amber-100">
             <div
