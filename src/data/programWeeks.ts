@@ -20,7 +20,7 @@ export const programWeeks: ProgramWeek[] = [
       'Tell me about something you are really good at.',
     ],
     durations: { warmUp: 30, practice: 60, speaking: 120 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 2,
@@ -41,7 +41,7 @@ export const programWeeks: ProgramWeek[] = [
       'What would happen if animals could talk?',
     ],
     durations: { warmUp: 30, practice: 60, speaking: 150 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 3,
@@ -62,7 +62,7 @@ export const programWeeks: ProgramWeek[] = [
       'Describe your favourite colour without naming it.',
     ],
     durations: { warmUp: 30, practice: 60, speaking: 150 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 4,
@@ -83,7 +83,7 @@ export const programWeeks: ProgramWeek[] = [
       'Should pets be kept indoors or outdoors?',
     ],
     durations: { warmUp: 30, practice: 90, speaking: 180 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 5,
@@ -104,7 +104,7 @@ export const programWeeks: ProgramWeek[] = [
       'You meet a very old person with amazing life stories. What do you ask?',
     ],
     durations: { warmUp: 30, practice: 90, speaking: 180 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 6,
@@ -125,7 +125,7 @@ export const programWeeks: ProgramWeek[] = [
       'Explain how to pack a school bag properly.',
     ],
     durations: { warmUp: 45, practice: 90, speaking: 180 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 7,
@@ -146,7 +146,7 @@ export const programWeeks: ProgramWeek[] = [
       'Describe the feeling of finishing something really hard.',
     ],
     durations: { warmUp: 45, practice: 90, speaking: 210 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 8,
@@ -167,7 +167,7 @@ export const programWeeks: ProgramWeek[] = [
       'Persuade me that your town is worth visiting.',
     ],
     durations: { warmUp: 45, practice: 90, speaking: 210 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 9,
@@ -188,7 +188,7 @@ export const programWeeks: ProgramWeek[] = [
       'What new subject would you add to school and how would it be taught?',
     ],
     durations: { warmUp: 45, practice: 120, speaking: 240 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 10,
@@ -209,7 +209,7 @@ export const programWeeks: ProgramWeek[] = [
       'Tell me about an invention that changed the world.',
     ],
     durations: { warmUp: 45, practice: 120, speaking: 240 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 11,
@@ -230,7 +230,7 @@ export const programWeeks: ProgramWeek[] = [
       'Is it fair that some children have more toys than others?',
     ],
     durations: { warmUp: 60, practice: 120, speaking: 240 },
-    minSessionsToUnlockNext: 5,
+    targetSessions: 5,
   },
   {
     weekNumber: 12,
@@ -251,6 +251,6 @@ export const programWeeks: ProgramWeek[] = [
       'What do you want to be when you grow up, and why are you already on your way?',
     ],
     durations: { warmUp: 60, practice: 120, speaking: 300 },
-    minSessionsToUnlockNext: 0, // final week
+    targetSessions: 0, // final week — no further target
   },
 ]

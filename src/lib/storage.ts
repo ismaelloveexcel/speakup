@@ -1,7 +1,4 @@
 import { AppState, SessionLog, AppSettings } from '@/types'
-import { programWeeks } from '@/data/programWeeks'
-
-const allWeekNumbers = programWeeks.map((w) => w.weekNumber)
 
 const KEYS = {
   STATE: 'speakup_state',
@@ -23,7 +20,6 @@ const defaultState: AppState = {
   currentWeek: 1,
   settings: defaultSettings,
   sessions: [],
-  unlockedWeeks: allWeekNumbers,
 }
 
 // ─── SSR guard ────────────────────────────────────────────────────────────────
@@ -67,7 +63,6 @@ export function loadState(): AppState {
     currentWeek: state.currentWeek ?? 1,
     settings: state.settings ?? defaultSettings,
     sessions: Array.isArray(state.sessions) ? state.sessions : [],
-    unlockedWeeks: Array.isArray(state.unlockedWeeks) ? state.unlockedWeeks : allWeekNumbers,
   }
 }
 
